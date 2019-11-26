@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 /*
@@ -14,7 +15,69 @@ public class App {
 
     public String bestCharge(List<String> inputs) {
         //TODO: write code here
+        StringBuffer storedString = new StringBuffer();
+        storedString.append("============= Order details =============\n");
 
-        return null;
+        int count = inputs.size();
+        List<String> orderItemList =new ArrayList<>();
+        String orderItem = new String();
+        int orderAmt;
+        int totalCost = 0;
+        int savedCost = 0;
+        boolean found;
+        boolean halfDiscount = false;
+
+        //List the order
+        for (int i = 0; i < count; i++){
+            //orderItem = inputs.get(i).substring(0, 8);
+            orderItemList.add(inputs.get(i).substring(0, 8));
+            orderAmt = Integer.parseInt(inputs.get(i).substring(11));
+            int j = 0;
+            found = false;
+            int sum = 0;
+            int orderPrice = 0;
+
+            while (!found){
+                if (itemRepository.findAll().get(j).getId().equals(orderItemList.get(i))){
+                    //System.out.println(orderItemList);
+                    //System.out.println(orderItemList.contains(salesPromotionRepository.findAll().get(1).getRelatedItems().get(0)));
+                    //System.out.println(orderItemList.contains(salesPromotionRepository.findAll().get(1).getRelatedItems().get(1)));
+                    if (salesPromotionRepository.findAll().get(1).getRelatedItems().contains(orderItemList.get(i))){
+
+                        if (orderItemList.contains(salesPromotionRepository.findAll().get(1).getRelatedItems().get(0)) && orderItemList.contains(salesPromotionRepository.findAll().get(1).getRelatedItems().get(1))){
+                            halfDiscount = true;
+                        }
+                        savedCost = savedCost + (int) itemRepository.findAll().get(j).getPrice() /2 * orderAmt;
+                    }
+                    orderPrice = (int) (itemRepository.findAll().get(j).getPrice() * orderAmt);
+                    storedString.append(itemRepository.findAll().get(j).getName()+" x " + orderAmt +" = " + orderPrice +" yuan\n");
+                    found = true;
+                    totalCost = totalCost + orderPrice;
+                }
+                j++;
+            }
+        }
+        //Check discount
+
+        if (halfDiscount || totalCost >= 30){
+            storedString.append("-----------------------------------\n");
+            storedString.append("Promotion used:\n");
+            if (halfDiscount){
+                storedString.append(salesPromotionRepository.findAll().get(1).getDisplayName()+" (Braised chicken，Cold noodles)，saving "+ savedCost +" yuan\n");
+                totalCost = totalCost -savedCost;
+            }else {
+                totalCost = totalCost - 6;
+                storedString.append(salesPromotionRepository.findAll().get(0).getDisplayName()+", saving 6 yuan\n");
+            }
+
+        }
+
+
+        storedString.append("-----------------------------------\n");
+        storedString.append("Total：" + totalCost + " yuan\n");
+        storedString.append("===================================");
+
+
+        return storedString.toString();
     }
 }
